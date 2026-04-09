@@ -1,0 +1,65 @@
+.vocab-page { max-width: 700px; margin: 0 auto; }
+.vocab-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.vocab-header h1 { font-size: 1.4rem; }
+.vocab-count {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+.vocab-empty { text-align: center; padding: 60px; color: var(--text-muted); }
+
+.vocab-list { display: flex; flex-direction: column; gap: 8px; }
+
+.vocab-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: box-shadow 0.15s;
+}
+.vocab-item.expanded { box-shadow: var(--shadow); }
+
+.vocab-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  cursor: pointer;
+  gap: 12px;
+}
+.vocab-item-header:hover { background: var(--bg); }
+
+.vocab-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; flex: 1; }
+.vocab-word { font-weight: 600; font-size: 0.95rem; }
+.vocab-pos {
+  font-size: 0.72rem;
+  background: #eef0ff;
+  color: var(--primary);
+  padding: 2px 7px;
+  border-radius: 6px;
+}
+.mastery-badge {
+  font-size: 0.72rem;
+  padding: 2px 7px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.vocab-meta { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.vocab-next { font-size: 0.78rem; color: var(--text-muted); }
+.vocab-chevron { font-size: 0.7rem; color: var(--text-muted); }
+
+.vocab-detail {
+  padding: 12px 16px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.detail-row { display: flex; gap: 12px; font-size: 0.88rem; }
+.detail-label { color: var(--text-muted); flex-shrink: 0; width: 36px; }
+.detail-actions { display: flex; justify-content: flex-end; margin-top: 4px; }

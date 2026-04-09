@@ -1,0 +1,52 @@
+.conv-page { max-width: 700px; margin: 0 auto; }
+.conv-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.conv-page-header h1 { font-size: 1.4rem; }
+.conv-empty { text-align: center; padding: 60px; color: var(--text-muted); }
+
+.new-conv-form { margin-bottom: 20px; }
+
+.word-select-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.word-chip {
+  padding: 5px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  background: var(--bg);
+  font-size: 0.85rem;
+  color: var(--text);
+  transition: all 0.15s;
+}
+.word-chip:hover { border-color: var(--primary); color: var(--primary); }
+.word-chip.selected { background: #eef0ff; border-color: var(--primary); color: var(--primary); font-weight: 600; }
+
+.conv-list { display: flex; flex-direction: column; gap: 10px; }
+
+.conv-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.conv-item:hover { box-shadow: var(--shadow); border-color: var(--primary); }
+.conv-item-icon { font-size: 1.5rem; flex-shrink: 0; }
+.conv-item-body { flex: 1; }
+.conv-item-title { font-weight: 600; margin-bottom: 3px; }
+.conv-item-meta { font-size: 0.8rem; color: var(--text-muted); }
+.conv-delete-btn {
+  background: none;
+  color: var(--text-muted);
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  transition: all 0.15s;
+}
+.conv-delete-btn:hover { background: #f8d7da; color: var(--danger); }
