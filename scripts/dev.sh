@@ -41,10 +41,10 @@ cd "$BACKEND_DIR"
 "$BACKEND_DIR/venv/bin/uvicorn" main:app --host 0.0.0.0 --port 8000 --reload &
 BACKEND_PID=$!
 
-# 프론트엔드 실행 (백그라운드)
-echo "[frontend] http://localhost:5173 시작..."
+# 프론트엔드 실행 (백그라운드, 내부 네트워크 접속 허용)
+echo "[frontend] http://0.0.0.0:5173 시작..."
 cd "$FRONTEND_DIR"
-npm run dev &
+npm run dev -- --host 0.0.0.0 &
 FRONTEND_PID=$!
 
 echo ""
