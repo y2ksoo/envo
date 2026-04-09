@@ -57,9 +57,16 @@ export default function ChatPage() {
           setMessages(prev => [...prev.filter(m => m.id !== userMsg.id), userMsg, data.message])
           setStreamText('')
         }
+        if (data.error) {
+          setStreamText('')
+          setMessages(prev => prev.filter(m => m.id !== userMsg.id))
+          alert(`오류가 발생했습니다: ${data.error}`)
+        }
       }
     } catch (e) {
       console.error(e)
+      setStreamText('')
+      setMessages(prev => prev.filter(m => m.id !== userMsg.id))
     } finally {
       setStreaming(false)
     }

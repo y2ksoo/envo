@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
 import type { User } from './types'
 import { getUsers } from './api/client'
@@ -15,7 +15,13 @@ export const UserContext = React.createContext<{
   setUser: (u: User | null) => void
 }>({ user: null, setUser: () => {} })
 
-import React from 'react'
+const NAV_ITEMS = [
+  { to: '/',            end: true,  icon: '🏠', label: '홈' },
+  { to: '/review',      end: false, icon: '🔁', label: '복습' },
+  { to: '/upload',      end: false, icon: '➕', label: '추가' },
+  { to: '/vocabulary',  end: false, icon: '📋', label: '단어장' },
+  { to: '/conversation',end: false, icon: '💬', label: '대화' },
+]
 
 function App() {
   const [user, setUser] = useState<User | null>(() => {
@@ -39,17 +45,21 @@ function App() {
     <UserContext.Provider value={{ user, setUser }}>
       <BrowserRouter>
         <div className="app">
+          {/* 상단 네비게이션 */}
           <nav className="navbar">
             <div className="nav-brand">📖 Envo</div>
+
+            {/* 데스크톱 메뉴 */}
             <div className="nav-links">
-              <NavLink to="/" end>홈</NavLink>
-              <NavLink to="/review">복습</NavLink>
-              <NavLink to="/upload">단어추가</NavLink>
-              <NavLink to="/vocabulary">단어장</NavLink>
-              <NavLink to="/conversation">대화</NavLink>
+              {NAV_ITEMS.map(item => (
+                <NavLink key={item.to} to={item.to} end={item.end}>
+                  {item.label}
+                </NavLink>
+              ))}
             </div>
+
             <button className="user-btn" onClick={() => setShowUserSelect(v => !v)}>
-              {user ? `${user.avatar_emoji} ${user.name}` : '👤 사용자 선택'}
+              {user ? `${user.avatar_emoji} ${user.name}` : '👤 선택'}
             </button>
           </nav>
 
@@ -67,11 +77,11 @@ function App() {
           )}
 
           <main className="main-content">
-            {!user ? (
+            {!user && (
               <div className="no-user-banner">
                 사용자를 선택하거나 홈에서 새 사용자를 만들어주세요.
               </div>
-            ) : null}
+            )}
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/review" element={<ReviewPage />} />
@@ -82,6 +92,16 @@ function App() {
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </main>
+
+          {/* 모바일 하단 탭바 */}
+          <nav className="bottom-nav">
+            {NAV_ITEMS.map(item => (
+              <NavLink key={item.to} to={item.to} end={item.end} className="bottom-nav-item">
+                <span className="bottom-nav-icon">{item.icon}</span>
+                <span className="bottom-nav-label">{item.label}</span>
+              </NavLink>
+            ))}
+          </nav>
         </div>
       </BrowserRouter>
     </UserContext.Provider>

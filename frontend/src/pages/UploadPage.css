@@ -1,6 +1,63 @@
 .upload-page { max-width: 700px; margin: 0 auto; }
 .upload-empty { text-align: center; padding: 60px; color: var(--text-muted); }
 
+/* Tabs */
+.upload-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.upload-tab {
+  flex: 1;
+  padding: 10px 16px;
+  background: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  border: none;
+  transition: all 0.15s;
+}
+.upload-tab:hover { background: var(--border); color: var(--text); }
+.upload-tab.active { background: var(--surface); color: var(--primary); font-weight: 600; }
+
+/* JSON format guide */
+.json-format-guide {
+  margin-top: 20px;
+}
+.guide-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+.guide-formats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 540px) {
+  .guide-formats { grid-template-columns: 1fr; }
+}
+.guide-format-label {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+.guide-format pre {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 0.75rem;
+  overflow-x: auto;
+  line-height: 1.5;
+  color: var(--text);
+}
+
 .drop-zone {
   border: 2px dashed var(--border);
   border-radius: 16px;

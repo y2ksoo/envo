@@ -1,5 +1,35 @@
 .vocab-page { max-width: 700px; margin: 0 auto; }
-.vocab-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.vocab-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+
+/* Manual add form */
+.manual-form {
+  margin-bottom: 16px;
+}
+.form-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 12px;
+}
+.form-group label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+.form-error {
+  background: #f8d7da;
+  border: 1px solid #f5c6cb;
+  color: #721c24;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
 .vocab-header h1 { font-size: 1.4rem; }
 .vocab-count {
   background: var(--bg);
