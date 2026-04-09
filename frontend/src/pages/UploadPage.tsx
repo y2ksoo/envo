@@ -238,7 +238,7 @@ export default function UploadPage() {
                 onDragOver={e => e.preventDefault()}
                 onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleJsonFile(f) }}
               >
-                <input ref={jsonFileRef} type="file" accept=".json,application/json"
+                <input ref={jsonFileRef} type="file" accept=".json"
                   style={{ display: 'none' }}
                   onChange={e => { const f = e.target.files?.[0]; if (f) handleJsonFile(f) }}
                 />
