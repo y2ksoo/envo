@@ -54,7 +54,7 @@ export default function ChatPage() {
           setStreamText(prev => prev + data.chunk)
         }
         if (data.done && data.message) {
-          setMessages(prev => [...prev.filter(m => m.id !== userMsg.id), userMsg, data.message])
+          setMessages(prev => [...prev.filter(m => m.id !== userMsg.id), userMsg, data.message as Message])
           setStreamText('')
         }
         if (data.error) {

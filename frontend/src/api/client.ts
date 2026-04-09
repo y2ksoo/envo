@@ -82,7 +82,7 @@ export async function* sendMessage(
   userId: number,
   convId: number,
   content: string
-): AsyncGenerator<{ chunk?: string; done?: boolean; message?: Message }> {
+): AsyncGenerator<{ chunk?: string; done?: boolean; message?: Message; error?: string }> {
   const res = await fetch(`${BASE}/users/${userId}/conversations/${convId}/messages`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
