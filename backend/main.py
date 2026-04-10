@@ -34,7 +34,10 @@ app.include_router(conversation.router, prefix="/api")
 app.include_router(word_sets.router, prefix="/api")
 
 # Serve React build
-frontend_dist = Path(__file__).parent.parent / "frontend" / "dist"
+# FRONTEND_DIST 환경변수 우선, 없으면 기본 경로 (hassio / 일반 배포 모두 지원)
+import os as _os
+_env_dist = _os.environ.get("FRONTEND_DIST")
+frontend_dist = Path(_env_dist) if _env_dist else Path(__file__).parent.parent / "frontend" / "dist"
 if frontend_dist.exists():
     app.mount("/assets", StaticFiles(directory=str(frontend_dist / "assets")), name="assets")
 

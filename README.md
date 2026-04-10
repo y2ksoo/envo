@@ -84,6 +84,38 @@ ANTHROPIC_API_KEY=sk-ant-...
 | http://localhost:8000/docs | API 문서 (Swagger) |
 | http://192.168.x.x:5173 | 같은 Wi-Fi의 다른 기기 |
 
+## Home Assistant (hassio) 배포
+
+### 1. 애드온 패키지 생성 (개발 PC에서)
+
+```bash
+./scripts/setup.sh --hassio
+```
+
+`hassio-addon-pkg/` 폴더가 생성됩니다.
+
+### 2. HA에 복사
+
+HA에서 **SSH** 또는 **Samba** 애드온을 먼저 활성화한 뒤:
+
+```bash
+# SSH 방식
+scp -r hassio-addon-pkg root@<HA_IP>:/addons/envo
+
+# Samba 방식: 네트워크 드라이브의 addons/ 폴더에 envo/ 폴더로 복사
+```
+
+### 3. HA UI에서 설치
+
+1. **설정 → 애드온 → 애드온 스토어 → ⋮ → 로컬 애드온 확인**
+2. `Envo 영단어 학습` 찾아 **[설치]** (Docker 빌드, 5~10분 소요)
+3. **[설정]** 탭에서 Anthropic API 키 입력
+4. **[시작]** → `http://<HA_IP>:8000` 으로 접속
+
+> 데이터(DB, 업로드 파일)는 HA의 `/data/envo/`에 영구 저장됩니다.
+
+---
+
 ## 라즈베리파이 배포
 
 ### 1. 파일 복사
