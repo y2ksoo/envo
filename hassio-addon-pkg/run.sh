@@ -1,15 +1,24 @@
-#!/bin/bash
+#!/usr/bin/with-contenv bash
 set -e
 
-# ── Home Assistant Options 읽기 ──────────────────────
-# bashio가 있으면 사용, 없으면 환경변수 fallback
-if command -v bashio &> /dev/null; then
-    ANTHROPIC_API_KEY=$(bashio::config 'anthropic_api_key')
-    PORT=$(bashio::config 'port')
-    DAILY_REVIEW_LIMIT=$(bashio::config 'daily_review_limit')
+# ── /data/options.json 에서 설정 읽기 ───────────────────
+# HA 애드온은 항상 이 파일에 설정을 저장함
+OPTIONS_FILE="/data/options.json"
+
+if [ ! -f "$OPTIONS_FILE" ]; then
+    echo "[FATAL] $OPTIONS_FILE 을 찾을 수 없습니다."
+    exit 1
 fi
 
-# 환경변수 기본값 처리
+read_option() {
+    python -c "import json,sys; d=json.load(open('$OPTIONS_FILE')); print(d.get('$1',''))"
+}
+
+ANTHROPIC_API_KEY=$(read_option 'anthropic_api_key')
+PORT=$(read_option 'port')
+DAILY_REVIEW_LIMIT=$(read_option 'daily_review_limit')
+
+# 기본값 처리
 PORT="${PORT:-8000}"
 DAILY_REVIEW_LIMIT="${DAILY_REVIEW_LIMIT:-50}"
 
@@ -18,7 +27,7 @@ if [ -z "$ANTHROPIC_API_KEY" ]; then
     exit 1
 fi
 
-# ── 데이터 디렉터리 런타임 생성 ──────────────────────
+# ── 런타임 디렉터리 생성 ──────────────────────────────
 mkdir -p /data/envo/uploads
 
 # ── 환경 변수 export ──────────────────────────────────
