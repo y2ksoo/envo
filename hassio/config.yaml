@@ -12,12 +12,14 @@ boot: auto
 ports:
   8000/tcp: 8000
 ports_description:
-  8000/tcp: "Envo 웹 앱"
+  8000/tcp: "Envo 웹 앱 (설정의 port 값과 일치시키세요)"
 options:
   anthropic_api_key: ""
+  port: 8000
   daily_review_limit: 50
 schema:
   anthropic_api_key: str
+  port: int(1024,65535)
   daily_review_limit: int
 panel_icon: "mdi:book-open-variant"
 panel_title: "Envo"
