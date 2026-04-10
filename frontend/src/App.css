@@ -162,6 +162,7 @@
   cursor: pointer;
   flex-shrink: 0;
   transition: background 0.15s;
+  margin-left: auto;
 }
 .hamburger-btn:hover { background: var(--bg); }
 

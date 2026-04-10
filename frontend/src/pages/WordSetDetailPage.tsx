@@ -14,9 +14,12 @@ export default function WordSetDetailPage() {
 
   const [wordSet, setWordSet] = useState<WordSet | null>(null)
   const [setCards, setSetCards] = useState<Card[]>([])
-  const [allCards, setAllCards] = useState<Card[]>([])
   const [loading, setLoading] = useState(true)
+
+  // 단어 추가 패널
   const [showAddWords, setShowAddWords] = useState(false)
+  const [unassignedCards, setUnassignedCards] = useState<Card[]>([])
+  const [addLoading, setAddLoading] = useState(false)
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [adding, setAdding] = useState(false)
 
@@ -27,19 +30,36 @@ export default function WordSetDetailPage() {
       getWordSets(user.id),
       getWordSetCards(user.id, setId),
     ]).then(([sets, cards]) => {
-      const ws = sets.find(s => s.id === setId)
-      setWordSet(ws ?? null)
+      setWordSet(sets.find(s => s.id === setId) ?? null)
       setSetCards(cards)
     }).catch(console.error)
       .finally(() => setLoading(false))
   }, [user, setId])
 
-  const loadAllCards = async () => {
+  // 어떤 세트에도 속하지 않은 단어만 로드
+  const loadUnassigned = async () => {
     if (!user) return
-    const cards = await getCards(user.id)
-    const setWordIds = new Set(setCards.map(c => c.word_id))
-    setAllCards(cards.filter(c => !setWordIds.has(c.word_id)))
-    setShowAddWords(true)
+    setAddLoading(true)
+    try {
+      const [allCards, allSets] = await Promise.all([
+        getCards(user.id),
+        getWordSets(user.id),
+      ])
+      // 모든 세트의 단어 id를 병렬로 가져와 합집합 구성
+      const allSetCards = await Promise.all(
+        allSets.map(ws => getWordSetCards(user.id, ws.id))
+      )
+      const assignedWordIds = new Set<number>(
+        allSetCards.flat().map(c => c.word_id)
+      )
+      setUnassignedCards(allCards.filter(c => !assignedWordIds.has(c.word_id)))
+      setSelected(new Set())
+      setShowAddWords(true)
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setAddLoading(false)
+    }
   }
 
   const handleAddCards = async () => {
@@ -73,6 +93,15 @@ export default function WordSetDetailPage() {
     })
   }
 
+  const allSelected = unassignedCards.length > 0 && selected.size === unassignedCards.length
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelected(new Set())
+    } else {
+      setSelected(new Set(unassignedCards.map(c => c.word_id)))
+    }
+  }
+
   if (!user) return <div className="vocab-empty">먼저 사용자를 선택해주세요.</div>
   if (loading) return <div className="vocab-empty">불러오는 중...</div>
   if (!wordSet) return <div className="vocab-empty">세트를 찾을 수 없습니다.</div>
@@ -98,16 +127,10 @@ export default function WordSetDetailPage() {
 
       {setCards.length > 0 && (
         <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' }}>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate(`/review?word_set_id=${setId}`)}
-          >
+          <button className="btn btn-primary" onClick={() => navigate(`/review?word_set_id=${setId}`)}>
             🔁 복습하기
           </button>
-          <button
-            className="btn btn-secondary"
-            onClick={() => navigate(`/quiz?word_set_id=${setId}`)}
-          >
+          <button className="btn btn-secondary" onClick={() => navigate(`/quiz?word_set_id=${setId}`)}>
             📝 퀴즈 시작
           </button>
         </div>
@@ -118,27 +141,41 @@ export default function WordSetDetailPage() {
           <h2 style={{ fontSize: '1.05rem', flex: 1 }}>단어 목록</h2>
           <button
             className="btn btn-secondary btn-sm"
-            onClick={showAddWords ? () => setShowAddWords(false) : loadAllCards}
+            onClick={showAddWords ? () => { setShowAddWords(false); setSelected(new Set()) } : loadUnassigned}
+            disabled={addLoading}
           >
-            {showAddWords ? '취소' : '+ 단어 추가'}
+            {addLoading ? '불러오는 중...' : showAddWords ? '취소' : '+ 단어 추가'}
           </button>
         </div>
 
         {showAddWords && (
           <div style={{ marginBottom: 16, borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: 10 }}>
-              내 단어장에서 선택하여 이 세트에 추가하세요.
-            </p>
-            {allCards.length === 0 ? (
-              <div style={{ color: 'var(--text-muted)' }}>추가할 수 있는 단어가 없습니다.</div>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 10, gap: 10 }}>
+              <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', flex: 1, margin: 0 }}>
+                아직 세트에 배정되지 않은 단어 {unassignedCards.length}개
+              </p>
+              {unassignedCards.length > 0 && (
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={toggleSelectAll}
+                >
+                  {allSelected ? '전체 해제' : '전체 선택'}
+                </button>
+              )}
+            </div>
+
+            {unassignedCards.length === 0 ? (
+              <div style={{ color: 'var(--text-muted)', padding: '12px 0' }}>
+                모든 단어가 이미 세트에 배정되어 있습니다.
+              </div>
             ) : (
               <>
-                <div style={{ maxHeight: 240, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
-                  {allCards.map(card => (
+                <div style={{ maxHeight: 280, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 12 }}>
+                  {unassignedCards.map(card => (
                     <label
                       key={card.id}
                       style={{
-                        display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
+                        display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px',
                         borderRadius: 8, cursor: 'pointer',
                         background: selected.has(card.word_id) ? '#eef0ff' : 'var(--bg)',
                         border: selected.has(card.word_id) ? '1px solid var(--primary)' : '1px solid var(--border)',
@@ -149,9 +186,17 @@ export default function WordSetDetailPage() {
                         checked={selected.has(card.word_id)}
                         onChange={() => toggleSelect(card.word_id)}
                       />
-                      <span style={{ fontWeight: 500 }}>{card.word}</span>
-                      {card.part_of_speech && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{card.part_of_speech}</span>}
-                      {card.definition && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: 'auto', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{card.definition}</span>}
+                      <span style={{ fontWeight: 500, flexShrink: 0 }}>{card.word}</span>
+                      {card.part_of_speech && (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--primary)', background: '#eef0ff', padding: '1px 6px', borderRadius: 5, flexShrink: 0 }}>
+                          {card.part_of_speech}
+                        </span>
+                      )}
+                      {card.definition && (
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: 'auto', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>
+                          {card.definition}
+                        </span>
+                      )}
                     </label>
                   ))}
                 </div>
@@ -172,23 +217,31 @@ export default function WordSetDetailPage() {
             아직 단어가 없습니다. 단어를 추가해보세요!
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {setCards.map(card => (
               <div
                 key={card.id}
                 style={{
                   display: 'flex', alignItems: 'center', gap: 12,
-                  padding: '10px 12px', borderRadius: 8,
+                  padding: '9px 12px', borderRadius: 8,
                   background: 'var(--bg)', border: '1px solid var(--border)',
                 }}
               >
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <span style={{ fontWeight: 600 }}>{card.word}</span>
-                  {card.part_of_speech && <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: 8 }}>{card.part_of_speech}</span>}
-                  {card.definition && <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: 2 }}>{card.definition}</div>}
+                  {card.part_of_speech && (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--primary)', background: '#eef0ff', padding: '1px 6px', borderRadius: 5, marginLeft: 8 }}>
+                      {card.part_of_speech}
+                    </span>
+                  )}
+                  {card.definition && (
+                    <div style={{ fontSize: '0.84rem', color: 'var(--text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {card.definition}
+                    </div>
+                  )}
                 </div>
                 <button
-                  style={{ color: 'var(--text-muted)', background: 'none', fontSize: '0.9rem', cursor: 'pointer' }}
+                  style={{ color: 'var(--text-muted)', background: 'none', fontSize: '0.9rem', cursor: 'pointer', flexShrink: 0 }}
                   onClick={() => handleRemoveCard(card)}
                   title="세트에서 제거"
                 >✕</button>

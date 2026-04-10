@@ -144,8 +144,14 @@ export default function VocabularyPage() {
         <h1>📋 단어장</h1>
         <span className="vocab-count">{loading ? '…' : `${displayCards.length}개`}</span>
         <button
-          className={`btn ${showForm ? 'btn-secondary' : 'btn-primary'} btn-sm`}
+          className="btn btn-secondary btn-sm"
           style={{ marginLeft: 'auto' }}
+          onClick={() => navigate('/word-sets')}
+        >
+          📂 단어 세트
+        </button>
+        <button
+          className={`btn ${showForm ? 'btn-secondary' : 'btn-primary'} btn-sm`}
           onClick={() => { setShowForm(v => !v); setSaveError('') }}
         >
           {showForm ? '취소' : '✏️ 직접 입력'}
