@@ -1,0 +1,26 @@
+name: "Envo 영단어 학습"
+description: "Anki 방식 복습, 스펠링 퀴즈, AI 대화 연습을 지원하는 영단어 학습 앱"
+version: "1.0.0"
+slug: "envo"
+init: false
+arch:
+  - aarch64
+  - amd64
+  - armv7
+startup: application
+boot: auto
+ports:
+  8000/tcp: 8000
+ports_description:
+  8000/tcp: "Envo 웹 앱 (설정의 port 값과 일치시키세요)"
+options:
+  anthropic_api_key: ""
+  port: 8000
+  daily_review_limit: 50
+schema:
+  anthropic_api_key: str
+  port: int(1024,65535)
+  daily_review_limit: int
+panel_icon: "mdi:book-open-variant"
+panel_title: "Envo"
+url: "https://github.com/yourusername/envo"
