@@ -14,7 +14,7 @@ RUN npm run build
 # ── Python 백엔드 설치 ────────────────────────────────
 WORKDIR /app
 COPY backend/ ./
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
 # ── 빌드된 프론트엔드 배치 ────────────────────────────
 RUN cp -r /build/frontend/dist /app/dist_frontend
