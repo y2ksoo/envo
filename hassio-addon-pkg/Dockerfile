@@ -1,8 +1,8 @@
 ARG BUILD_FROM=ghcr.io/home-assistant/aarch64-base-python:3.12
 FROM $BUILD_FROM
 
-# ── Node.js 설치 (프론트엔드 빌드용) ─────────────────
-RUN apk add --no-cache nodejs npm
+# ── 시스템 패키지 ─────────────────────────────────────
+RUN apk add --no-cache nodejs npm py3-pip
 
 # ── 프론트엔드 빌드 ────────────────────────────────────
 WORKDIR /build/frontend
@@ -14,7 +14,7 @@ RUN npm run build
 # ── Python 백엔드 설치 ────────────────────────────────
 WORKDIR /app
 COPY backend/ ./
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --break-system-packages -r requirements.txt
 
 # ── 빌드된 프론트엔드 배치 ────────────────────────────
 RUN cp -r /build/frontend/dist /app/dist_frontend

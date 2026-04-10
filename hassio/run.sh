@@ -33,7 +33,7 @@ echo "[INFO] Envo 서버 시작 중 (포트 ${PORT})..."
 
 # ── 서버 실행 ─────────────────────────────────────────
 cd /app
-exec python3 -m uvicorn main:app \
+exec python -m uvicorn main:app \
     --host 0.0.0.0 \
     --port "${PORT}" \
     --workers 2 \
