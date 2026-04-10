@@ -66,7 +66,10 @@ function App() {
         <div className="app">
           {/* 상단 네비게이션 */}
           <nav className="navbar">
-            <Link to="/" className="nav-brand" onClick={closeMobileMenu}>📖 Envo</Link>
+            <Link to="/" className="nav-brand" onClick={closeMobileMenu}>
+              <img src="/favicon.png" alt="Envo" className="nav-logo" />
+              Envo
+            </Link>
 
             {/* 데스크톱 메뉴 */}
             <div className="nav-links">

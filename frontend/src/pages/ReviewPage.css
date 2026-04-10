@@ -1,5 +1,5 @@
 .review-page {
-  max-width: 600px;
+  max-width: 580px;
   margin: 0 auto;
 }
 
@@ -11,31 +11,33 @@
 }
 
 .review-progress {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
   color: var(--text-muted);
   flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
 }
 
 .review-progress-bar {
   flex: 1;
-  height: 6px;
+  height: 5px;
   background: var(--border);
-  border-radius: 3px;
+  border-radius: 99px;
   overflow: hidden;
 }
 
 .review-progress-fill {
   height: 100%;
-  background: var(--primary);
-  border-radius: 3px;
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, var(--primary), #818cf8);
+  border-radius: 99px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Flashcard with flip animation */
+/* ── Flashcard ── */
 .flashcard {
-  perspective: 1000px;
-  height: 320px;
-  margin-bottom: 24px;
+  perspective: 1200px;
+  height: 300px;
+  margin-bottom: 20px;
   cursor: pointer;
 }
 
@@ -43,7 +45,7 @@
   position: relative;
   width: 100%;
   height: 100%;
-  transition: transform 0.5s;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
   transform-style: preserve-3d;
 }
 
@@ -59,9 +61,9 @@
   backface-visibility: hidden;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-  padding: 32px;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  padding: 32px 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -69,40 +71,49 @@
   text-align: center;
 }
 
+.flashcard-front {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f8ff 100%);
+}
+
 .flashcard-back {
   transform: rotateY(180deg);
   justify-content: flex-start;
   padding-top: 28px;
+  background: linear-gradient(135deg, #fafafa 0%, #f5f4ff 100%);
 }
 
 .card-word {
-  font-size: 2.4rem;
+  font-size: 2.2rem;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  letter-spacing: -0.03em;
 }
 
 .card-pos {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
+  font-weight: 600;
   color: var(--primary);
-  background: #eef0ff;
+  background: var(--primary-light);
   padding: 3px 10px;
-  border-radius: 10px;
-  margin-bottom: 16px;
+  border-radius: 99px;
+  margin-bottom: 18px;
+  letter-spacing: 0.02em;
 }
 
 .card-definition {
-  font-size: 1.05rem;
-  color: var(--text);
-  margin-bottom: 16px;
-  line-height: 1.5;
+  font-size: 1rem;
+  color: var(--text-2);
+  margin-bottom: 14px;
+  line-height: 1.6;
+  font-weight: 400;
 }
 
 .card-example {
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--text-muted);
   font-style: italic;
-  line-height: 1.5;
+  line-height: 1.6;
   border-top: 1px solid var(--border);
   padding-top: 14px;
   width: 100%;
@@ -110,44 +121,49 @@
 }
 
 .tap-hint {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-top: 16px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-faint);
+  margin-top: 18px;
+  letter-spacing: 0.02em;
 }
 
-/* Rating buttons */
+/* ── Rating buttons ── */
 .rating-buttons {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 8px;
 }
 
 .btn-rate {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 8px;
-  border-radius: 12px;
+  padding: 12px 6px;
+  border-radius: var(--radius);
   font-weight: 600;
   transition: all 0.15s;
-  border: 2px solid transparent;
+  border: 1.5px solid transparent;
+  gap: 3px;
 }
 
-.btn-rate:disabled { opacity: 0.6; }
+.btn-rate:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-rate:not(:disabled):hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+.btn-rate:not(:disabled):active { transform: translateY(0); }
 
-.rate-label { font-size: 0.95rem; }
-.rate-interval { font-size: 0.75rem; margin-top: 2px; opacity: 0.8; }
+.rate-label { font-size: 0.88rem; }
+.rate-interval { font-size: 0.7rem; opacity: 0.75; font-weight: 500; }
 
-.btn-rate.again { background: #ffe5e5; color: #c82333; }
-.btn-rate.again:hover:not(:disabled) { background: #dc3545; color: white; }
-.btn-rate.hard { background: #fff3cd; color: #856404; }
-.btn-rate.hard:hover:not(:disabled) { background: #ffc107; color: white; }
-.btn-rate.good { background: #d4edda; color: #155724; }
-.btn-rate.good:hover:not(:disabled) { background: #28a745; color: white; }
-.btn-rate.easy { background: #cce5ff; color: #004085; }
-.btn-rate.easy:hover:not(:disabled) { background: #007bff; color: white; }
+.btn-rate.again  { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+.btn-rate.again:hover:not(:disabled)  { background: #ef4444; color: white; border-color: #ef4444; }
+.btn-rate.hard   { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+.btn-rate.hard:hover:not(:disabled)   { background: #f59e0b; color: white; border-color: #f59e0b; }
+.btn-rate.good   { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+.btn-rate.good:hover:not(:disabled)   { background: #22c55e; color: white; border-color: #22c55e; }
+.btn-rate.easy   { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+.btn-rate.easy:hover:not(:disabled)   { background: #3b82f6; color: white; border-color: #3b82f6; }
 
-/* Done / Empty */
+/* ── Complete / Empty ── */
 .review-empty,
 .review-complete {
   text-align: center;
@@ -155,18 +171,30 @@
   color: var(--text-muted);
 }
 
-.review-complete h2 { font-size: 1.6rem; color: var(--text); margin-bottom: 16px; }
-.complete-icon { font-size: 3rem; margin-bottom: 12px; }
+.review-complete h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 16px;
+  letter-spacing: -0.02em;
+}
+.complete-icon { font-size: 2.8rem; margin-bottom: 10px; }
 
 .complete-stats {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   justify-content: center;
   flex-wrap: wrap;
-  margin-top: 16px;
+  margin-top: 14px;
+}
+.complete-stats span {
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 0.83rem;
+  font-weight: 600;
 }
 
-.stat-again { color: #dc3545; font-weight: 600; }
-.stat-hard { color: #856404; font-weight: 600; }
-.stat-good { color: #155724; font-weight: 600; }
-.stat-easy { color: #004085; font-weight: 600; }
+.stat-again { background: #fef2f2; color: #b91c1c; }
+.stat-hard  { background: #fffbeb; color: #92400e; }
+.stat-good  { background: #f0fdf4; color: #166534; }
+.stat-easy  { background: #eff6ff; color: #1e40af; }
