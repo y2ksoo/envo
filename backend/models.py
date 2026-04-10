@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from sqlalchemy import (
     Column, Integer, String, Float, Text, ForeignKey,
-    UniqueConstraint, Index, Date, DateTime, func
+    UniqueConstraint, Index, Date, DateTime,
 )
 from sqlalchemy.orm import relationship
 from database import Base
@@ -19,6 +19,7 @@ class User(Base):
     uploads = relationship("Upload", back_populates="user", cascade="all, delete-orphan")
     conversations = relationship("Conversation", back_populates="user", cascade="all, delete-orphan")
     review_logs = relationship("ReviewLog", back_populates="user", cascade="all, delete-orphan")
+    word_sets = relationship("WordSet", back_populates="user", cascade="all, delete-orphan")
 
 
 class Word(Base):
@@ -29,6 +30,8 @@ class Word(Base):
     definition = Column(Text)
     part_of_speech = Column(String)
     example_sentence = Column(Text)
+    synonyms = Column(Text)   # JSON: ["similar1", "similar2"]
+    antonyms = Column(Text)   # JSON: ["opposite1", "opposite2"]
     source_image_id = Column(Integer, ForeignKey("uploads.id"), nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -42,7 +45,7 @@ class Upload(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     filename = Column(String, nullable=False)
     file_path = Column(String, nullable=False)
-    status = Column(String, default="pending")  # pending|processing|done|error
+    status = Column(String, default="pending")
     extracted_count = Column(Integer, default=0)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -51,7 +54,6 @@ class Upload(Base):
 
 class UserCard(Base):
     __tablename__ = "user_cards"
-    __table_args__ = (UniqueConstraint("user_id", "word_id"),)
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -80,7 +82,7 @@ class ReviewLog(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     word_id = Column(Integer, ForeignKey("words.id"), nullable=False)
-    quality = Column(Integer, nullable=False)  # 0-5
+    quality = Column(Integer, nullable=False)
     interval_before = Column(Integer)
     interval_after = Column(Integer)
     ef_before = Column(Float)
@@ -90,13 +92,40 @@ class ReviewLog(Base):
     user = relationship("User", back_populates="review_logs")
 
 
+class WordSet(Base):
+    __tablename__ = "word_sets"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    name = Column(String, nullable=False)      # e.g. "Week 1 (Jan 8)"
+    week_start = Column(Date, nullable=True)   # 해당 주 시작일
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="word_sets")
+    set_cards = relationship("WordSetCard", back_populates="word_set", cascade="all, delete-orphan")
+
+
+class WordSetCard(Base):
+    __tablename__ = "word_set_cards"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    word_set_id = Column(Integer, ForeignKey("word_sets.id"), nullable=False)
+    word_id = Column(Integer, ForeignKey("words.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    word_set = relationship("WordSet", back_populates="set_cards")
+    word = relationship("Word")
+
+    __table_args__ = (UniqueConstraint("word_set_id", "word_id"),)
+
+
 class Conversation(Base):
     __tablename__ = "conversations"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     title = Column(String)
-    focus_words = Column(Text)  # JSON array of word_ids
+    focus_words = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -110,9 +139,9 @@ class Message(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     conversation_id = Column(Integer, ForeignKey("conversations.id"), nullable=False)
-    role = Column(String, nullable=False)  # 'user' | 'assistant'
+    role = Column(String, nullable=False)
     content = Column(Text, nullable=False)
-    corrections = Column(Text)  # JSON: [{original, corrected, explanation}]
+    corrections = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     conversation = relationship("Conversation", back_populates="messages")

@@ -7,7 +7,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from database import create_tables
-from routers import cards, conversation, uploads, users, review
+from routers import cards, conversation, uploads, users, review, word_sets
 
 
 @asynccontextmanager
@@ -31,6 +31,7 @@ app.include_router(cards.router, prefix="/api")
 app.include_router(uploads.router, prefix="/api")
 app.include_router(review.router, prefix="/api")
 app.include_router(conversation.router, prefix="/api")
+app.include_router(word_sets.router, prefix="/api")
 
 # Serve React build
 frontend_dist = Path(__file__).parent.parent / "frontend" / "dist"

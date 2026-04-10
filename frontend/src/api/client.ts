@@ -1,6 +1,6 @@
 import type {
   Card, Conversation, DeckStats, ExtractedWord,
-  Message, Upload, User
+  Message, Upload, User, WordSet
 } from '../types'
 
 const BASE = '/api'
@@ -30,17 +30,27 @@ export const getCards = (userId: number, search = '') =>
   req<Card[]>(`/users/${userId}/cards${search ? `?search=${encodeURIComponent(search)}` : ''}`)
 export const getDeckStats = (userId: number) =>
   req<DeckStats>(`/users/${userId}/cards/stats`)
-export const addCard = (userId: number, word: string, definition?: string, partOfSpeech?: string, exampleSentence?: string) =>
+export const addCard = (userId: number, word: string, definition?: string, partOfSpeech?: string, exampleSentence?: string, synonyms?: string[], antonyms?: string[]) =>
   req<Card>(`/users/${userId}/cards`, {
     method: 'POST',
-    body: JSON.stringify({ word, definition, part_of_speech: partOfSpeech, example_sentence: exampleSentence }),
+    body: JSON.stringify({
+      word, definition, part_of_speech: partOfSpeech,
+      example_sentence: exampleSentence,
+      synonyms: synonyms ?? [],
+      antonyms: antonyms ?? [],
+    }),
   })
 export const deleteCard = (userId: number, cardId: number) =>
   req<void>(`/users/${userId}/cards/${cardId}`, { method: 'DELETE' })
 
 // --- Review ---
-export const getReviewSession = (userId: number) =>
-  req<Card[]>(`/users/${userId}/review/session`)
+export const getReviewSession = (userId: number, wordSetId?: number, mode: 'scheduled' | 'all' | 'hard' = 'scheduled') => {
+  const params = new URLSearchParams()
+  if (wordSetId) params.set('word_set_id', String(wordSetId))
+  if (mode !== 'scheduled') params.set('mode', mode)
+  const qs = params.toString()
+  return req<Card[]>(`/users/${userId}/review/session${qs ? `?${qs}` : ''}`)
+}
 export const submitReview = (userId: number, cardId: number, quality: number) =>
   req(`/users/${userId}/review/${cardId}`, {
     method: 'POST',
@@ -63,6 +73,26 @@ export const confirmWords = (userId: number, uploadId: number, words: string[]) 
     method: 'POST',
     body: JSON.stringify(words),
   })
+
+// --- Word Sets ---
+export const getWordSets = (userId: number) =>
+  req<WordSet[]>(`/users/${userId}/word-sets`)
+export const createWordSet = (userId: number, name: string, weekStart?: string) =>
+  req<WordSet>(`/users/${userId}/word-sets`, {
+    method: 'POST',
+    body: JSON.stringify({ name, week_start: weekStart ?? null }),
+  })
+export const deleteWordSet = (userId: number, setId: number) =>
+  req<void>(`/users/${userId}/word-sets/${setId}`, { method: 'DELETE' })
+export const getWordSetCards = (userId: number, setId: number) =>
+  req<Card[]>(`/users/${userId}/word-sets/${setId}/cards`)
+export const addCardsToSet = (userId: number, setId: number, wordIds: number[]) =>
+  req<{ added: number }>(`/users/${userId}/word-sets/${setId}/cards`, {
+    method: 'POST',
+    body: JSON.stringify(wordIds),
+  })
+export const removeCardFromSet = (userId: number, setId: number, wordId: number) =>
+  req<void>(`/users/${userId}/word-sets/${setId}/cards/${wordId}`, { method: 'DELETE' })
 
 // --- Conversations ---
 export const getConversations = (userId: number) =>

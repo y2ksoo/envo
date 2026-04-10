@@ -1,23 +1,48 @@
-# Envo — 영어 학습 앱
+# Envo — 영단어 학습 앱
 
-책 페이지 사진이나 JSON 파일로 단어를 추가하고, Anki 방식으로 복습하며, Claude AI와 영어 대화 연습을 할 수 있는 가족용 자체 호스팅 웹앱입니다.
+책 페이지 사진이나 JSON 파일로 단어를 추가하고, Anki 방식으로 복습하며, 스펠링 퀴즈와 Claude AI 대화 연습을 할 수 있는 가족용 자체 호스팅 웹앱입니다.
 
 ## 기능
 
-### 단어 암기 (Anki 방식)
+### 단어 추가
 - **사진으로 추가**: 책 페이지를 촬영하면 Claude Vision이 단어를 자동 추출
 - **JSON으로 추가**: 단어 목록 파일을 업로드하여 일괄 추가
-- **직접 입력**: 단어, 품사, 정의, 예문을 수동 입력
-- **SM-2 알고리즘**: Anki와 동일한 간격 반복 스케줄링 (Again / Hard / Good / Easy)
+- **직접 입력**: 단어, 품사, 정의, 예문, 유사어, 반의어를 수동 입력
+
+### 단어장
+- 전체 단어 목록을 한 줄 컴팩트 형식으로 표시 (단어 + 정의 미리보기)
+- 단어 세트별 탭 필터로 주차별 단어만 모아보기
+- 클릭하면 정의 / 예문 / 유사어 / 반의어 / 학습 통계 펼쳐보기
+- 단어에서 바로 세트에 추가 가능
+
+### 단어 세트 (주차별 관리)
+- 주차 단위로 단어 세트 생성 및 관리
+- 세트 단위로 복습 또는 퀴즈 시작
+- 세트에 단어장 단어를 자유롭게 추가 / 제거
+
+### 복습 (Anki 방식)
+- **SM-2 알고리즘**: Anki와 동일한 간격 반복 스케줄링
+- 복습 버튼: Again / Hard / Good / Easy (4단계)
+- **복습 방식 선택**:
+  - 오늘 예정 — 오늘 복습 예정인 카드만
+  - 전체 복습 — 날짜 무관하게 전체 단어 복습
+  - 핵심 복습 — 마지막 복습에서 Again/Hard였던 단어만
+- 복습 범위를 전체 또는 특정 단어 세트로 지정 가능
+- 완료 후 어려운 단어 수를 강조 표시, 바로 핵심 복습 연결
+
+### 스펠링 퀴즈
+- 정의를 보고 단어 스펠링을 직접 입력 (최대 20문제)
+- 퀴즈 범위를 전체 또는 단어 세트 단위로 선택
+- 마지막 결과가 자동 저장되어 다음 방문 시 이전 점수 확인 가능
+- 틀린 단어만 추려서 다시 퀴즈 가능
 
 ### 영어 대화 연습
 - Claude AI와 자유 영어 대화
-- 암기한 단어를 포커스 단어로 설정하면 대화 중 자연스럽게 활용
 - 문법 오류 자동 교정 및 설명 제공
 
 ### 다중 사용자
 - 로그인 없이 사용자 선택만으로 전환
-- 사용자별 독립적인 단어장과 학습 진도
+- 사용자별 독립적인 단어장, 세트, 학습 진도, 퀴즈 기록
 
 ## 기술 스택
 
@@ -129,7 +154,9 @@ crontab -e
     "word": "ephemeral",
     "part_of_speech": "adjective",
     "definition": "lasting for only a short time",
-    "example_sentence": "Fame is ephemeral, but great work endures."
+    "example_sentence": "Fame is ephemeral, but great work endures.",
+    "synonyms": ["transient", "fleeting", "momentary"],
+    "antonyms": ["permanent", "lasting", "enduring"]
   },
   {
     "word": "resilient",
@@ -140,7 +167,7 @@ crontab -e
 ]
 ```
 
-지원하는 키: `word` (필수), `definition` / `meaning` / `desc`, `part_of_speech` / `pos`, `example_sentence` / `example`
+지원하는 키: `word` (필수), `definition` / `meaning` / `desc`, `part_of_speech` / `pos`, `example_sentence` / `example`, `synonyms`, `antonyms`
 
 ## 프로젝트 구조
 
@@ -153,22 +180,27 @@ envo/
 │   ├── models.py            # SQLAlchemy 모델
 │   ├── schemas.py           # Pydantic 스키마
 │   ├── config.py            # 환경 설정
-│   ├── database.py          # DB 연결, 테이블 생성
+│   ├── database.py          # DB 연결, 테이블 생성, 마이그레이션
 │   └── routers/
 │       ├── users.py         # 사용자 관리
 │       ├── cards.py         # 단어장 CRUD
-│       ├── review.py        # 복습 세션 (SM-2)
+│       ├── review.py        # 복습 세션 (SM-2, 복습 모드)
+│       ├── word_sets.py     # 단어 세트 관리
 │       ├── uploads.py       # 사진 업로드, OCR
 │       └── conversation.py  # 대화 세션, 스트리밍
 ├── frontend/
 │   └── src/
 │       ├── pages/
-│       │   ├── HomePage.tsx        # 대시보드, 사용자 관리
-│       │   ├── ReviewPage.tsx      # 플래시카드 복습
-│       │   ├── UploadPage.tsx      # 단어 추가 (사진/JSON/수동)
-│       │   ├── VocabularyPage.tsx  # 단어장 조회
-│       │   ├── ConversationPage.tsx # 대화 목록
-│       │   └── ChatPage.tsx        # 실시간 대화
+│       │   ├── HomePage.tsx           # 대시보드, 빠른 메뉴
+│       │   ├── UsersPage.tsx          # 사용자 관리
+│       │   ├── ReviewPage.tsx         # 플래시카드 복습 (모드 선택)
+│       │   ├── UploadPage.tsx         # 단어 추가 (사진/JSON/수동)
+│       │   ├── VocabularyPage.tsx     # 단어장 (세트 필터, 컴팩트 뷰)
+│       │   ├── WordSetsPage.tsx       # 단어 세트 목록
+│       │   ├── WordSetDetailPage.tsx  # 세트 상세, 단어 추가/제거
+│       │   ├── QuizPage.tsx           # 스펠링 퀴즈
+│       │   ├── ConversationPage.tsx   # 대화 목록
+│       │   └── ChatPage.tsx           # 실시간 대화
 │       ├── api/client.ts    # API 클라이언트
 │       └── types/index.ts   # TypeScript 타입
 ├── scripts/
@@ -181,7 +213,14 @@ envo/
     └── envo.conf            # nginx 리버스 프록시 설정
 ```
 
-## API 문서
+## API 주요 엔드포인트
+
+| 메서드 | 경로 | 설명 |
+|---|---|---|
+| GET | `/api/users/{id}/cards` | 단어장 조회 |
+| GET | `/api/users/{id}/review/session?mode=scheduled\|all\|hard` | 복습 카드 |
+| GET | `/api/users/{id}/word-sets` | 단어 세트 목록 |
+| POST | `/api/users/{id}/word-sets/{sid}/cards` | 세트에 단어 추가 |
 
 개발 서버 실행 후 http://localhost:8000/docs 에서 Swagger UI로 모든 API를 확인하고 직접 테스트할 수 있습니다.
 
@@ -197,4 +236,5 @@ sqlite3 backend/data/envo.db
 sqlite> .tables
 sqlite> SELECT * FROM users;
 sqlite> SELECT word, definition FROM words LIMIT 10;
+sqlite> SELECT name, card_count FROM word_sets;
 ```

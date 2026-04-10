@@ -1,10 +1,11 @@
+import json
 from datetime import date
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 
 from database import get_db
 from models import User, Word, UserCard
-from schemas import CardOut, DeckStats, WordCreate, WordOut
+from schemas import CardOut, DeckStats, WordCreate
 
 router = APIRouter(tags=["cards"])
 
@@ -16,7 +17,16 @@ def _get_user_or_404(user_id: int, db: Session) -> User:
     return user
 
 
-def _card_to_out(card: UserCard) -> CardOut:
+def _parse_json_list(value: str | None) -> list[str]:
+    if not value:
+        return []
+    try:
+        return json.loads(value)
+    except Exception:
+        return []
+
+
+def card_to_out(card: UserCard) -> CardOut:
     return CardOut(
         id=card.id,
         word_id=card.word_id,
@@ -24,6 +34,8 @@ def _card_to_out(card: UserCard) -> CardOut:
         definition=card.word.definition,
         part_of_speech=card.word.part_of_speech,
         example_sentence=card.word.example_sentence,
+        synonyms=_parse_json_list(card.word.synonyms),
+        antonyms=_parse_json_list(card.word.antonyms),
         easiness_factor=card.easiness_factor,
         interval=card.interval,
         repetitions=card.repetitions,
@@ -34,11 +46,7 @@ def _card_to_out(card: UserCard) -> CardOut:
 
 
 @router.get("/users/{user_id}/cards", response_model=list[CardOut])
-def list_cards(
-    user_id: int,
-    search: str = "",
-    db: Session = Depends(get_db),
-):
+def list_cards(user_id: int, search: str = "", db: Session = Depends(get_db)):
     _get_user_or_404(user_id, db)
     query = (
         db.query(UserCard)
@@ -48,7 +56,7 @@ def list_cards(
     if search:
         query = query.join(Word).filter(Word.word.ilike(f"%{search}%"))
     cards = query.order_by(UserCard.created_at.desc()).all()
-    return [_card_to_out(c) for c in cards]
+    return [card_to_out(c) for c in cards]
 
 
 @router.get("/users/{user_id}/cards/stats", response_model=DeckStats)
@@ -76,9 +84,17 @@ def add_word_to_deck(user_id: int, body: WordCreate, db: Session = Depends(get_d
             definition=body.definition,
             part_of_speech=body.part_of_speech,
             example_sentence=body.example_sentence,
+            synonyms=json.dumps(body.synonyms) if body.synonyms else None,
+            antonyms=json.dumps(body.antonyms) if body.antonyms else None,
         )
         db.add(word)
         db.flush()
+    else:
+        # 기존 단어에 누락된 정보 보완
+        if body.synonyms and not word.synonyms:
+            word.synonyms = json.dumps(body.synonyms)
+        if body.antonyms and not word.antonyms:
+            word.antonyms = json.dumps(body.antonyms)
 
     existing = db.query(UserCard).filter(
         UserCard.user_id == user_id, UserCard.word_id == word.id
@@ -90,7 +106,7 @@ def add_word_to_deck(user_id: int, body: WordCreate, db: Session = Depends(get_d
     db.add(card)
     db.commit()
     db.refresh(card)
-    return _card_to_out(card)
+    return card_to_out(card)
 
 
 @router.delete("/users/{user_id}/cards/{card_id}", status_code=204)

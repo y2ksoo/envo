@@ -26,7 +26,10 @@
   font-weight: 700;
   color: var(--primary);
   flex-shrink: 0;
+  text-decoration: none;
+  cursor: pointer;
 }
+.nav-brand:hover { opacity: 0.8; }
 
 /* 데스크톱 메뉴 - 기본 표시 */
 .nav-links {

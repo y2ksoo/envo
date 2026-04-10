@@ -1,6 +1,7 @@
+import json
 from datetime import date, datetime
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 # --- Users ---
@@ -27,6 +28,8 @@ class WordOut(BaseModel):
     definition: Optional[str]
     part_of_speech: Optional[str]
     example_sentence: Optional[str]
+    synonyms: list[str] = []
+    antonyms: list[str] = []
     created_at: datetime
 
     model_config = {"from_attributes": True}
@@ -37,6 +40,8 @@ class WordCreate(BaseModel):
     definition: Optional[str] = None
     part_of_speech: Optional[str] = None
     example_sentence: Optional[str] = None
+    synonyms: list[str] = []
+    antonyms: list[str] = []
 
 
 # --- Uploads ---
@@ -69,6 +74,8 @@ class CardOut(BaseModel):
     definition: Optional[str]
     part_of_speech: Optional[str]
     example_sentence: Optional[str]
+    synonyms: list[str] = []
+    antonyms: list[str] = []
     easiness_factor: float
     interval: int
     repetitions: int
@@ -97,8 +104,26 @@ class ReviewResult(BaseModel):
 class DeckStats(BaseModel):
     total_words: int
     due_today: int
-    mastered: int  # repetitions >= 5
-    new_cards: int  # repetitions == 0
+    mastered: int
+    new_cards: int
+
+
+# --- Word Sets ---
+
+class WordSetCreate(BaseModel):
+    name: str
+    week_start: Optional[date] = None
+
+
+class WordSetOut(BaseModel):
+    id: int
+    user_id: int
+    name: str
+    week_start: Optional[date]
+    created_at: datetime
+    card_count: int = 0
+
+    model_config = {"from_attributes": True}
 
 
 # --- Conversations ---

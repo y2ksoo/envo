@@ -5,15 +5,6 @@ export interface User {
   created_at: string
 }
 
-export interface Word {
-  id: number
-  word: string
-  definition: string | null
-  part_of_speech: string | null
-  example_sentence: string | null
-  created_at: string
-}
-
 export interface Card {
   id: number
   word_id: number
@@ -21,6 +12,8 @@ export interface Card {
   definition: string | null
   part_of_speech: string | null
   example_sentence: string | null
+  synonyms: string[]
+  antonyms: string[]
   easiness_factor: number
   interval: number
   repetitions: number
@@ -51,6 +44,15 @@ export interface ExtractedWord {
   definition: string | null
   example_sentence: string | null
   already_in_deck: boolean
+}
+
+export interface WordSet {
+  id: number
+  user_id: number
+  name: string
+  week_start: string | null
+  created_at: string
+  card_count: number
 }
 
 export interface Conversation {
@@ -85,4 +87,10 @@ export const QUALITY_MAP: Record<ReviewQuality, number> = {
   hard: 2,
   good: 4,
   easy: 5,
+}
+
+export interface QuizQuestion {
+  card: Card
+  userAnswer: string
+  isCorrect: boolean | null  // null = 아직 답 안함
 }

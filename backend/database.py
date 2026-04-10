@@ -43,5 +43,18 @@ def get_db():
 
 
 def create_tables():
-    from models import User, Word, Upload, UserCard, ReviewLog, Conversation, Message  # noqa
+    from models import User, Word, Upload, UserCard, ReviewLog, Conversation, Message, WordSet, WordSetCard  # noqa
     Base.metadata.create_all(bind=engine)
+    _migrate()
+
+
+def _migrate():
+    """기존 DB에 새 컬럼이 없을 경우 추가 (SQLite ALTER TABLE)."""
+    from sqlalchemy import text
+    with engine.connect() as conn:
+        word_cols = [r[1] for r in conn.execute(text("PRAGMA table_info(words)")).fetchall()]
+        if "synonyms" not in word_cols:
+            conn.execute(text("ALTER TABLE words ADD COLUMN synonyms TEXT"))
+        if "antonyms" not in word_cols:
+            conn.execute(text("ALTER TABLE words ADD COLUMN antonyms TEXT"))
+        conn.commit()
